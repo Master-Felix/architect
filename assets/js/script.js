@@ -1,99 +1,28 @@
-// Initialize Hero Carousel with enhanced controls and smooth animations
+// Initialize Hero Carousel
 function initHeroCarousel() {
-  try {
-    const heroCarousel = document.querySelector('#heroCarousel');
-    if (!heroCarousel) {
-      console.warn('Hero carousel element not found');
-      return;
+  const heroCarousel = document.querySelector('#heroCarousel');
+  if (!heroCarousel) return;
+
+  // Initialize carousel with autoplay and pause on hover
+  const carousel = new bootstrap.Carousel(heroCarousel, {
+    interval: 6000,
+    touch: true,
+    wrap: true,
+    pause: 'hover',
+    ride: 'carousel'
+  });
+  
+  // Ensure autoplay starts
+  carousel.cycle();
+  
+  // Pause carousel when window is not visible
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      carousel.cycle();
+    } else {
+      carousel.pause();
     }
-
-    // Check if Bootstrap Carousel is available
-    if (typeof bootstrap === 'undefined' || !bootstrap.Carousel) {
-      console.error('Bootstrap Carousel not loaded');
-      return;
-    }
-
-    // Show the first slide immediately
-    const firstSlide = heroCarousel.querySelector('.carousel-item:first-child');
-    if (firstSlide) {
-      firstSlide.classList.add('active');
-      firstSlide.style.opacity = '1';
-    }
-
-    // Initialize carousel with options
-    const carousel = new bootstrap.Carousel(heroCarousel, {
-      interval: 8000,            // 8 seconds between slides
-      touch: true,              // Enable touch support
-      wrap: true,               // Loop through slides
-      pause: 'hover',           // Pause on hover
-      keyboard: true,           // Enable keyboard navigation
-      ride: 'carousel'          // Autoplay
-    });
-
-    // Handle slide transitions
-    heroCarousel.addEventListener('slid.bs.carousel', function () {
-      // Ensure all slides are properly hidden
-      const slides = this.querySelectorAll('.carousel-item');
-      slides.forEach(slide => {
-        if (!slide.classList.contains('active')) {
-          slide.style.opacity = '0';
-        }
-      });
-      
-      // Show the active slide
-      const activeSlide = this.querySelector('.carousel-item.active');
-      if (activeSlide) {
-        activeSlide.style.opacity = '1';
-        
-        // Animate content
-        const activeContent = activeSlide.querySelector('.hero-content');
-        if (activeContent) {
-          activeContent.style.opacity = '0';
-          activeContent.style.transform = 'translateY(20px)';
-          
-          setTimeout(() => {
-            activeContent.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-            activeContent.style.opacity = '1';
-            activeContent.style.transform = 'translateY(0)';
-          }, 50);
-        }
-      }
-    });
-    
-    // Trigger initial slide show
-    const event = new Event('slid.bs.carousel');
-    heroCarousel.dispatchEvent(event);
-
-    // Handle page visibility changes
-    const handleVisibilityChange = () => {
-      if (!carousel || !carousel._element) return;
-      
-      if (document.visibilityState === 'visible') {
-        carousel.cycle();
-      } else {
-        carousel.pause();
-      }
-    };
-    
-    // Add event listeners
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Pause on window blur (when switching tabs)
-    window.addEventListener('blur', () => carousel.pause());
-    window.addEventListener('focus', () => carousel.cycle());
-    
-    // Cleanup function
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', () => carousel.pause());
-      window.removeEventListener('focus', () => carousel.cycle());
-      if (carousel && typeof carousel.dispose === 'function') {
-        carousel.dispose();
-      }
-    };
-  } catch (error) {
-    console.error('Error initializing carousel:', error);
-  }
+  });
 }
 
 // Wait for the DOM to be fully loaded

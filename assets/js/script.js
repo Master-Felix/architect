@@ -1,22 +1,62 @@
-$(document).ready(function () {
-  // Sticky Navbar
-  $(window).scroll(function () {
-    if ($(this).scrollTop() > 50) {
-      $('.navbar').addClass('scrolled');
+// Initialize Hero Carousel
+function initHeroCarousel() {
+  const heroCarousel = document.querySelector('#heroCarousel');
+  if (!heroCarousel) return;
+
+  // Initialize carousel with autoplay and pause on hover
+  const carousel = new bootstrap.Carousel(heroCarousel, {
+    interval: 6000,
+    touch: true,
+    wrap: true,
+    pause: 'hover',
+    ride: 'carousel'
+  });
+  
+  // Ensure autoplay starts
+  carousel.cycle();
+  
+  // Pause carousel when window is not visible
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      carousel.cycle();
     } else {
-      $('.navbar').removeClass('scrolled');
+      carousel.pause();
     }
   });
+}
 
-// Enhancements: scroll reveal, back-to-top, and active nav by URL
-$(document).ready(function () {
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize carousel
+  initHeroCarousel();
+  
+  // Initialize Bootstrap tooltips and popovers
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  // Sticky Navbar
+  const navbar = document.querySelector('.navbar');
+  if (navbar) {
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+  }
+
   // Active nav by pathname
   const path = window.location.pathname.split('/').pop() || 'index.html';
-  $('#nav-links .nav-link').each(function () {
-    const href = $(this).attr('href');
-    if (href === path) {
-      $('#nav-links .nav-link').removeClass('active');
-      $(this).addClass('active');
+  document.querySelectorAll('#nav-links .nav-link').forEach(link => {
+    if (link.getAttribute('href') === path) {
+      link.classList.add('active');
+      link.setAttribute('aria-current', 'page');
+    } else {
+      link.classList.remove('active');
+      link.removeAttribute('aria-current');
     }
   });
 
@@ -30,105 +70,40 @@ $(document).ready(function () {
           io.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15 });
+    }, { 
+      threshold: 0.15,
+      rootMargin: '0px 0px -50px 0px' // Load elements slightly before they come into view
+    });
+    
     revealEls.forEach(el => io.observe(el));
   } else {
     // Fallback: show immediately
     revealEls.forEach(el => el.classList.add('in-view'));
   }
 
-  // Back to top behavior (if present)
-  const $backTop = $('#back-to-top');
-  if ($backTop.length) {
+  // Back to top behavior
+  const backToTop = document.getElementById('back-to-top');
+  if (backToTop) {
     const toggleBackTop = () => {
-      if (window.scrollY > 300) $backTop.fadeIn(); else $backTop.fadeOut();
+      if (window.scrollY > 300) {
+        backToTop.style.display = 'block';
+      } else {
+        backToTop.style.display = 'none';
+      }
     };
-    toggleBackTop();
-    $(window).on('scroll', toggleBackTop);
-    $backTop.on('click', function () {
-      $('html, body').animate({ scrollTop: 0 }, 700);
+
+    window.addEventListener('scroll', toggleBackTop);
+    
+    backToTop.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     });
+
+    toggleBackTop(); // Initial check
   }
-});
-
-  // Sample Project Data
-  const projects = [
-    { id: 1, title: "Beachfront Villa", location: "Diani, Kwale", category: "residential", img: "assets/img/project1.jpg" },
-    { id: 2, title: "Modern Apartment", location: "Westlands, Nairobi", category: "interior", img: "assets/img/project2.jpg" },
-    { id: 3, title: "Tech Hub", location: "Upperhill, Nairobi", category: "commercial", img: "assets/img/project3.jpg" },
-    { id: 4, title: "City Mall", location: "Mombasa CBD", category: "urban", img: "assets/img/project4.jpg" },
-    { id: 5, title: "Safari Lodge", location: "Maasai Mara", category: "residential", img: "assets/img/project5.jpg" },
-    { id: 6, title: "Boutique Hotel", location: "Watamu, Kilifi", category: "commercial", img: "assets/img/project6.jpg" }
-  ];
-
-  // Load Featured Projects (Homepage)
-  function loadFeatured() {
-    const container = $('#featured-projects');
-    projects.slice(0, 4).forEach(p => {
-      container.append(`
-        <div class="col-md-6 col-lg-3">
-          <a href="project-detail.html" class="text-decoration-none">
-            <div class="project-card">
-              <img src="${p.img}" class="img-fluid" alt="${p.title}">
-              <div class="project-overlay">
-                <h5>${p.title}</h5>
-                <p class="mb-0">${p.location}</p>
-              </div>
-            </div>
-          </a>
-        </div>
-      `);
-    });
-  }
-
-  // Load Portfolio Grid
-  function loadPortfolio(filter = 'all') {
-    const container = $('#portfolio-grid');
-    container.empty();
-    const filtered = filter === 'all' ? projects : projects.filter(p => p.category === filter);
-    filtered.forEach(p => {
-      container.append(`
-        <div class="col-md-6 col-lg-4 mb-4">
-          <a href="project-detail.html" class="text-decoration-none">
-            <div class="project-card">
-              <img src="${p.img}" class="img-fluid" alt="${p.title}">
-              <div class="project-overlay">
-                <h5>${p.title}</h5>
-                <p>${p.location}</p>
-              </div>
-            </div>
-          </a>
-        </div>
-      `);
-    });
-  }
-
-  // Filter Buttons
-  $('.filter-btn').click(function () {
-    $('.filter-btn').removeClass('active');
-    $(this).addClass('active');
-    const filter = $(this).data('filter');
-    loadPortfolio(filter);
-  });
-
-  // Initialize
-  if ($('#featured-projects').length) loadFeatured();
-  if ($('#portfolio-grid').length) loadPortfolio();
-
-  // Smooth scroll
-  $('a[href^="#"]').click(function (e) {
-    e.preventDefault();
-    $('html, body').animate({
-      scrollTop: $($(this).attr('href')).offset().top - 80
-    }, 800);
-  });
-});
-
-$(document).ready(function () {
-  // Sticky Navbar
-  $(window).scroll(function () {
-    $('.navbar').toggleClass('scrolled', $(this).scrollTop() > 50);
-  });
 
   // Project Data with Detailed Information
   const projects = [
@@ -138,11 +113,7 @@ $(document).ready(function () {
       location: "Diani, Kwale",
       category: "residential",
       img: "assets/img/project1.jpg",
-      images: [
-        "assets/img/project1.jpg",
-        "assets/img/project2.jpg",
-        "assets/img/project3.jpg"
-      ],
+      images: ["assets/img/project1.jpg", "assets/img/project2.jpg", "assets/img/project3.jpg"],
       area: "4,500 sq.ft.",
       year: "2023",
       type: "Luxury Villa",
@@ -164,11 +135,7 @@ $(document).ready(function () {
       location: "Westlands, Nairobi",
       category: "interior",
       img: "assets/img/project2.jpg",
-      images: [
-        "assets/img/project2.jpg",
-        "assets/img/project1.jpg",
-        "assets/img/project4.jpg"
-      ],
+      images: ["assets/img/project2.jpg", "assets/img/project1.jpg", "assets/img/project4.jpg"],
       area: "2,200 sq.ft.",
       year: "2022",
       type: "Apartment Renovation",
@@ -190,23 +157,19 @@ $(document).ready(function () {
       location: "Upperhill, Nairobi",
       category: "commercial",
       img: "assets/img/project3.jpg",
-      images: [
-        "assets/img/project3.jpg",
-        "assets/img/project1.jpg",
-        "assets/img/project2.jpg"
-      ],
+      images: ["assets/img/project3.jpg", "assets/img/project1.jpg", "assets/img/project2.jpg"],
       area: "85,000 sq.ft.",
       year: "2023",
       type: "Office Building",
       status: "In Progress",
-      description: "Innovative tech campus designed to foster collaboration and creativity. The campus features flexible workspaces, green roofs, and state-of-the-art facilities that prioritize employee well-being and environmental sustainability.",
+      description: "A state-of-the-art tech hub designed to foster innovation and collaboration. The building features flexible workspaces, meeting rooms, and communal areas that encourage interaction and creativity.",
       features: [
-        "LEED Platinum certification",
+        "Open-plan workspaces",
+        "Conference facilities",
         "Rooftop garden",
         "Collaborative workspaces",
         "Fitness center",
-        "Cafeteria with outdoor seating",
-        "Electric vehicle charging"
+        "Cafeteria with outdoor seating"
       ],
       projectUrl: "#"
     },
@@ -216,11 +179,7 @@ $(document).ready(function () {
       location: "Mombasa CBD",
       category: "urban",
       img: "assets/img/project4.jpg",
-      images: [
-        "assets/img/project4.jpg",
-        "assets/img/project2.jpg",
-        "assets/img/project5.jpg"
-      ],
+      images: ["assets/img/project4.jpg", "assets/img/project2.jpg", "assets/img/project5.jpg"],
       area: "150,000 sq.ft.",
       year: "2022",
       type: "Mixed-Use Development",
@@ -242,11 +201,7 @@ $(document).ready(function () {
       location: "Maasai Mara",
       category: "residential",
       img: "assets/img/project5.jpg",
-      images: [
-        "assets/img/project5.jpg",
-        "assets/img/project3.jpg",
-        "assets/img/project6.jpg"
-      ],
+      images: ["assets/img/project5.jpg", "assets/img/project3.jpg", "assets/img/project6.jpg"],
       area: "6,800 sq.ft.",
       year: "2023",
       type: "Luxury Tented Camp",
@@ -268,11 +223,7 @@ $(document).ready(function () {
       location: "Watamu, Kilifi",
       category: "commercial",
       img: "assets/img/project6.jpg",
-      images: [
-        "assets/img/project6.jpg",
-        "assets/img/project4.jpg",
-        "assets/img/project1.jpg"
-      ],
+      images: ["assets/img/project6.jpg", "assets/img/project4.jpg", "assets/img/project1.jpg"],
       area: "45,000 sq.ft.",
       year: "2023",
       type: "Boutique Hotel",
@@ -290,169 +241,170 @@ $(document).ready(function () {
     }
   ];
 
-  // Load Featured (Home)
-  if ($('#featured-projects').length) {
-    projects.slice(0, 4).forEach(p => {
-      $('#featured-projects').append(`
-        <div class="col-md-6 col-lg-3">
-          <a href="project-detail.html?id=${p.id}" class="text-decoration-none">
-            <div class="project-card">
-              <img src="${p.img}" class="img-fluid" alt="${p.title}">
-              <div class="project-overlay">
-                <h5>${p.title}</h5>
-                <p class="mb-0">${p.location}</p>
-              </div>
+  // Load Featured Projects (Homepage)
+  function loadFeatured() {
+    const container = document.getElementById('featured-projects');
+    if (!container) return;
+
+    projects.slice(0, 4).forEach(project => {
+      const projectElement = document.createElement('div');
+      projectElement.className = 'col-md-6 col-lg-3';
+      projectElement.innerHTML = `
+        <a href="project-detail.html?id=${project.id}" class="text-decoration-none">
+          <div class="project-card">
+            <img src="${project.img}" class="img-fluid" alt="${project.title}" loading="lazy">
+            <div class="project-overlay">
+              <h5>${project.title}</h5>
+              <p class="mb-0">${project.location}</p>
             </div>
-          </a>
-        </div>
-      `);
+          </div>
+        </a>
+      `;
+      container.appendChild(projectElement);
     });
   }
 
-  // Load Portfolio
+  // Load Portfolio Grid
   function loadPortfolio(filter = 'all') {
-    const container = $('#portfolio-grid');
-    container.empty();
+    const container = document.getElementById('portfolio-grid');
+    if (!container) return;
+
+    container.innerHTML = ''; // Clear existing content
     const filtered = filter === 'all' ? projects : projects.filter(p => p.category === filter);
     
-    filtered.forEach(p => {
-      const projectElement = $(`
-        <div class="col-md-6 col-lg-4 mb-4">
-          <div class="portfolio-item" data-id="${p.id}">
-            <div class="portfolio-img">
-              <img src="${p.img}" class="img-fluid" alt="${p.title}">
-              <div class="portfolio-overlay">
-                <div class="overlay-content">
-                  <h5 class="text-white mb-2">${p.title}</h5>
-                  <p class="mb-0 text-white-50"><i class="fas fa-map-marker-alt me-1"></i> ${p.location}</p>
-                  <div class="mt-3">
-                    <span class="badge bg-accent">${p.category.charAt(0).toUpperCase() + p.category.slice(1)}</span>
-                  </div>
-                </div>
-              </div>
-              <a href="#" class="portfolio-link" data-bs-toggle="modal" data-bs-target="#projectModal" data-id="${p.id}"></a>
-            </div>
-            <div class="portfolio-info">
-              <span class="portfolio-category">${p.type}</span>
-              <h3 class="portfolio-title">${p.title}</h3>
-              <p class="portfolio-location"><i class="fas fa-map-marker-alt"></i> ${p.location}</p>
+    filtered.forEach(project => {
+      const projectElement = document.createElement('div');
+      projectElement.className = 'col-md-6 col-lg-4 mb-4';
+      projectElement.innerHTML = `
+        <div class="project-card" data-bs-toggle="modal" data-bs-target="#projectModal" onclick="openProjectModal(${project.id})">
+          <img src="${project.img}" class="img-fluid" alt="${project.title}" loading="lazy">
+          <div class="project-overlay">
+            <h5>${project.title}</h5>
+            <p>${project.location}</p>
+            <span class="btn btn-sm btn-outline-light mt-2">View Project</span>
+          </div>
+        </div>
+      `;
+      container.appendChild(projectElement);
+    });
+
+    // Initialize Masonry after images load
+    if (typeof imagesLoaded !== 'undefined') {
+      imagesLoaded(container, function() {
+        if (typeof Masonry !== 'undefined') {
+          new Masonry(container, {
+            itemSelector: '.col-md-6',
+            percentPosition: true
+          });
+        }
+      });
+    }
+  }
+
+  // Open Project Modal with Project Details
+  window.openProjectModal = function(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    // Update modal content
+    document.getElementById('modalProjectTitle').textContent = project.title;
+    document.getElementById('modalProjectLocation').innerHTML = `<i class="fas fa-map-marker-alt me-2"></i>${project.location}`;
+    document.getElementById('modalProjectCategory').textContent = project.category.charAt(0).toUpperCase() + project.category.slice(1);
+    document.getElementById('modalProjectDescription').textContent = project.description;
+    
+    // Update project meta
+    const metaContainer = document.querySelector('.project-meta .row');
+    if (metaContainer) {
+      metaContainer.innerHTML = `
+        <div class="col-6 mb-3">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-ruler-combined me-2"></i>
+            <div>
+              <span class="d-block text-muted small">Area</span>
+              <span>${project.area}</span>
             </div>
           </div>
         </div>
-      `);
-      
-      // Add click handler for the project
-      projectElement.find('.portfolio-link').on('click', function(e) {
-        e.preventDefault();
-        const projectId = parseInt($(this).data('id'));
-        const project = projects.find(p => p.id === projectId);
-        if (project) {
-          openProjectModal(project);
-        }
-      });
-      
-      container.append(projectElement);
-    });
-    
-    // Initialize Masonry after loading items
-    if ($.fn.masonry) {
-      container.masonry({
-        itemSelector: '.col-md-6',
-        percentPosition: true
-      });
-    }
-  }
-  
-  // Open Project Modal with Project Details
-  function openProjectModal(project) {
-    // Set main project image
-    $('#modalProjectImage').attr('src', project.images[0]).attr('alt', project.title);
-    
-    // Set project details
-    $('#modalProjectTitle').text(project.title);
-    $('#modalProjectCategory').text(project.type);
-    $('#modalProjectLocation').html(`<i class="fas fa-map-marker-alt me-2"></i>${project.location}`);
-    $('#modalProjectArea').text(project.area);
-    $('#modalProjectYear').text(project.year);
-    $('#modalProjectType').text(project.type);
-    $('#modalProjectStatus').text(project.status);
-    $('#modalProjectDescription').html(`<p>${project.description}</p>`);
-    
-    // Set project features
-    const $featuresList = $('#projectFeatures');
-    $featuresList.empty();
-    if (project.features && project.features.length > 0) {
-      project.features.forEach(feature => {
-        $featuresList.append(`<li class="col-12 col-sm-6">${feature}</li>`);
-      });
-    }
-    
-    // Set project URL
-    const $viewBtn = $('#projectViewBtn');
-    if (project.projectUrl) {
-      $viewBtn.attr('href', project.projectUrl).show();
-    } else {
-      $viewBtn.hide();
-    }
-    
-    // Set up image gallery
-    const $gallery = $('#projectGallery');
-    $gallery.empty();
-    
-    if (project.images && project.images.length > 1) {
-      project.images.forEach((img, index) => {
-        const isActive = index === 0 ? 'active' : '';
-        $gallery.append(`
-          <div class="col-4 col-sm-3">
-            <div class="gallery-thumb ${isActive}" data-img="${img}">
-              <img src="${img}" alt="${project.title} - ${index + 1}" class="img-fluid">
+        <div class="col-6 mb-3">
+          <div class="d-flex align-items-center">
+            <i class="far fa-calendar-alt me-2"></i>
+            <div>
+              <span class="d-block text-muted small">Year</span>
+              <span>${project.year}</span>
             </div>
           </div>
-        `);
-      });
+        </div>
+        <div class="col-6">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-tag me-2"></i>
+            <div>
+              <span class="d-block text-muted small">Type</span>
+              <span>${project.type}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            <div>
+              <span class="d-block text-muted small">Status</span>
+              <span>${project.status}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Update project features
+    const featuresList = document.getElementById('projectFeatures');
+    if (featuresList) {
+      featuresList.innerHTML = project.features
+        .map(feature => `<li class="col-12 col-sm-6"><i class="fas fa-check text-accent me-2"></i>${feature}</li>`)
+        .join('');
+    }
+    
+    // Update project images gallery
+    const gallery = document.getElementById('projectGallery');
+    const modalImage = document.getElementById('modalProjectImage');
+    
+    if (gallery && modalImage) {
+      gallery.innerHTML = '';
       
-      // Add click handler for gallery thumbnails
-      $gallery.find('.gallery-thumb').on('click', function() {
-        const imgSrc = $(this).data('img');
-        $('#modalProjectImage').attr('src', imgSrc);
-        $gallery.find('.gallery-thumb').removeClass('active');
-        $(this).addClass('active');
+      // Set main image
+      modalImage.src = project.images[0];
+      modalImage.alt = project.title;
+      
+      // Add thumbnails
+      project.images.forEach((img, index) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'col-4 mb-2';
+        thumb.innerHTML = `
+          <img src="${img}" 
+               class="img-fluid rounded cursor-pointer ${index === 0 ? 'active' : ''}" 
+               alt="${project.title} - ${index + 1}" 
+               onclick="document.getElementById('modalProjectImage').src='${img}'; 
+                       this.parentElement.parentElement.querySelectorAll('img').forEach(i => i.classList.remove('active'));
+                       this.classList.add('active');">
+        `;
+        gallery.appendChild(thumb);
       });
     }
     
-    // Show the modal
+    // Update project URL
+    const viewBtn = document.getElementById('projectViewBtn');
+    if (viewBtn) {
+      viewBtn.href = project.projectUrl;
+    }
+    
+    // Show modal
     const projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
     projectModal.show();
+  };
+
+  // Initialize portfolio
+  if (document.getElementById('featured-projects')) {
+    loadFeatured();
   }
-
-  if ($('#portfolio-grid').length) loadPortfolio();
-
-  $('.filter-btn').click(function () {
-    $('.filter-btn').removeClass('active');
-    $(this).addClass('active');
-    loadPortfolio($(this).data('filter'));
-  });
-
-  // Project Modal Gallery Navigation
-  $(document).on('click', '.gallery-thumb', function() {
-    const $this = $(this);
-    const $modal = $this.closest('.modal');
-    const $gallery = $this.closest('.project-gallery');
-    const $thumbs = $gallery.find('.gallery-thumb');
-    const $mainImg = $modal.find('.project-modal-img img');
-    
-    // Update active state
-    $thumbs.removeClass('active');
-    $this.addClass('active');
-    
-    // Update main image with fade effect
-    const newSrc = $this.data('img');
-    if (newSrc) {
-      $mainImg.fadeOut(200, function() {
-        $(this).attr('src', newSrc).fadeIn(200);
-      });
-    }
-  });
   
   // Close modal when clicking outside content
   $('#projectModal').on('click', function(e) {

@@ -49,22 +49,22 @@
   <!-- Hero Section -->
   <section class="hero">
     <!-- Hero Carousel -->
-    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
       <div class="carousel-inner">
         <div class="carousel-item active">
-          <img src="assets/img/hero/h1.jpg" class="d-block w-100" alt="Modern architectural design in Nairobi, Kenya">
+          <img src="assets/img/hero/h1.jpg" class="d-block w-100" alt="Modern architectural design in Nairobi, Kenya" loading="lazy">
         </div>
         <div class="carousel-item">
-          <img src="assets/img/hero/h2.jpg" class="d-block w-100" alt="Luxury residential architecture in Kenya">
+          <img src="assets/img/hero/h2.jpg" class="d-block w-100" alt="Luxury residential architecture in Kenya" loading="lazy">
         </div>
         <div class="carousel-item">
-          <img src="assets/img/hero/h3.jpg" class="d-block w-100" alt="Contemporary office space design in Kenya">
+          <img src="assets/img/hero/h3.jpg" class="d-block w-100" alt="Contemporary office space design in Kenya" loading="lazy">
         </div>
         <div class="carousel-item">
-          <img src="assets/img/hero/h4.jpg" class="d-block w-100" alt="Elegant interior design in Nairobi">
+          <img src="assets/img/hero/h4.jpg" class="d-block w-100" alt="Elegant interior design in Nairobi" loading="lazy">
         </div>
         <div class="carousel-item">
-          <img src="assets/img/hero/h5.jpg" class="d-block w-100" alt="Sustainable architecture in Kenya">
+          <img src="assets/img/hero/h5.jpg" class="d-block w-100" alt="Sustainable architecture in Kenya" loading="lazy">
         </div>
       </div>
       <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" aria-label="Previous slide">
@@ -416,6 +416,13 @@
   <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://unpkg.com/isotope-layout@3.0.6/dist/isotope.pkgd.min.js"></script>
+  <script src="https://unpkg.com/imagesloaded@5.0.0/imagesloaded.pkgd.min.js"></script>
+  <script>
+    // Initialize AOS
+    AOS.init();
+  </script>
   <script src="assets/js/script.js"></script>
 
   <!-- Back to top button -->

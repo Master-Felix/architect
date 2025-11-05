@@ -4,6 +4,7 @@ function initHeroCarousel() {
   if (!heroCarousel) return;
 
   // Initialize carousel with autoplay and pause on hover
+  if (typeof bootstrap === 'undefined' || !bootstrap.Carousel) return;
   const carousel = new bootstrap.Carousel(heroCarousel, {
     interval: 6000,
     touch: true,
@@ -25,8 +26,16 @@ function initHeroCarousel() {
   });
 }
 
-// Wait for the DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
+// Wait for the DOM to be fully loaded (or run immediately if already ready)
+function onReady(fn) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fn);
+  } else {
+    fn();
+  }
+}
+
+onReady(function() {
   // Initialize carousel
   initHeroCarousel();
   

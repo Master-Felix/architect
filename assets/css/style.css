@@ -336,6 +336,22 @@ html { scroll-behavior: smooth; }
   pointer-events: none;
 }
 
+/* Ensure the carousel fills the hero height */
+.hero .carousel,
+.hero .carousel-inner {
+  height: 100%;
+}
+
+/* Make carousel cover the hero area */
+.hero .carousel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
 .hero .carousel-item {
   position: absolute;
   top: 0;

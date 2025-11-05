@@ -16,6 +16,37 @@ function initHeroCarousel() {
   // Ensure autoplay starts
   carousel.cycle();
   
+  // Sync hero content with active slide
+  const updateHeroContent = () => {
+    const active = heroCarousel.querySelector('.carousel-item.active');
+    if (!active) return;
+    const titleEl = document.getElementById('hero-title');
+    const subtitleEl = document.getElementById('hero-subtitle');
+    const cta1 = document.getElementById('hero-cta1');
+    const cta2 = document.getElementById('hero-cta2');
+
+    if (titleEl && active.dataset.title) titleEl.textContent = active.dataset.title;
+    if (subtitleEl && active.dataset.subtitle) subtitleEl.textContent = active.dataset.subtitle;
+
+    if (cta1) {
+      if (active.dataset.cta1Link) cta1.href = active.dataset.cta1Link;
+      const icon = cta1.querySelector('i');
+      const iconHTML = icon ? icon.outerHTML : '';
+      if (active.dataset.cta1Text) cta1.innerHTML = `${active.dataset.cta1Text} ${iconHTML}`.trim();
+    }
+
+    if (cta2) {
+      if (active.dataset.cta2Link) cta2.href = active.dataset.cta2Link;
+      const icon = cta2.querySelector('i');
+      const iconHTML = icon ? icon.outerHTML : '';
+      if (active.dataset.cta2Text) cta2.innerHTML = `${active.dataset.cta2Text} ${iconHTML}`.trim();
+    }
+  };
+
+  // Initial sync and on slide change
+  updateHeroContent();
+  heroCarousel.addEventListener('slid.bs.carousel', updateHeroContent);
+  
   // Pause carousel when window is not visible
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') {
